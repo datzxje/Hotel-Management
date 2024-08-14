@@ -16,7 +16,6 @@
 
 - Authentication, Authorization
 - CRUD
-- Validator (not null, format, check duplicate)
 - Paging
 - Searching
 
