@@ -1,5 +1,6 @@
 package com.datzxje.hotelmanagement.configs;
 
+import com.datzxje.hotelmanagement.enums.UserRole;
 import com.datzxje.hotelmanagement.services.jwt.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
 @EnableWebSecurity
@@ -21,10 +25,19 @@ public class WebSecurityConfiguration {
 
     private final UserService userService;
 
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(request->
-                request.requestMatchers("/api/auth/**").permitAll());
+                request.requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/admin/**").hasAnyAuthority(UserRole.ADMIN.name())
+                        .requestMatchers("/api/customer/**").hasAnyAuthority(UserRole.CUSTOMER.name())
+                        .anyRequest().authenticated())
+                .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
+                .authenticationProvider(authProvider()).addFilterBefore(jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
