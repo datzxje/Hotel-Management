@@ -16,8 +16,7 @@
 
 - Authentication, Authorization
 - CRUD
-- Paging
-- Searching
+- Pagination
 
 # How to run
 
